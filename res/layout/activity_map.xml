@@ -5,20 +5,67 @@
     tools:context=".MapActivity" >
 
     <TextView
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:text="@string/hello_world" />
-    
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+
+    <fragment
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
-		android:id="@+id/map"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		class="com.google.android.gms.maps.MapFragment"
-		map:cameraTargetLat="49.220737"
-		map:cameraTargetLng="-123.106613"
-		map:cameraZoom="11"/>
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/t_title"
+        class="com.google.android.gms.maps.MapFragment"
+        map:cameraTargetLat="49.220737"
+        map:cameraTargetLng="-123.106613"
+        map:cameraZoom="11" />
+
+    <Button
+        android:id="@+id/post_trip_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:text="@string/post_trip" />
+
+    <TextView
+        android:id="@+id/t_econ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/t_dist"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:text="Average Economy: " />
+
+    <TextView
+        android:id="@+id/t_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/t_econ"
+        android:layout_centerHorizontal="true"
+        android:text="Trip "
+        android:textSize="28px"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/t_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/post_trip_button"
+        android:layout_alignParentLeft="true"
+        android:text="Description: " />
+
+    <TextView
+        android:id="@+id/t_dist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/t_desc"
+        android:layout_alignParentLeft="true"
+        android:text="Total Trip Distance: " />
 
 </RelativeLayout>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string-array name="updateInterval">
+        <item name="15">Every 15 minutes</item>
+        <item name="30">Every 30 minutes</item>
+        <item name="60">Every hour</item>
+        <item name="120">Every 2 hours</item>
+        <item name="180">Every 3 hours</item>
+    </string-array>
+    
+    <string-array name="updateIntervalValues">
+        <item name="15">900000</item>
+        <item name="30">1800000</item>
+        <item name="60">3600000</item>
+        <item name="120">7200000</item>
+        <item name="180">10800000</item>
+    </string-array>
+
+</resources>

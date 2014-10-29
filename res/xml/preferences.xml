@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<PreferenceCategory 
+		android:title="General Settings"
+		android:key="first_category">
+		
+		<CheckBoxPreference 
+			android:key="perform_updates"
+			android:summary="Check to enable automatic Facebook posting"
+			android:title="Enable updates" 
+			android:defaultValue="true"
+		/>
+		
+		<ListPreference 
+			android:key="updates_interval"
+			android:title="Update frequency"
+			android:summary="Define how frequently you want Social Drive to post updates"
+			android:defaultValue="30" 
+			android:entries="@array/updateInterval"
+			android:entryValues="@array/updateIntervalValues"
+			android:dependency="perform_updates"
+		/>	
+			
+	</PreferenceCategory>
+
+	<PreferenceCategory 
+		android:title="Vehicle Information"
+		android:key="second_category">
+
+		<EditTextPreference
+			android:key="vehicle_name"
+			android:title="Vehicle Name" 
+			android:summary="What is the vehicle manufacturer and model"
+			android:dialogTitle="Vehicle Model"
+			android:dialogMessage="Please specify the vehicle that you own"	
+			android:defaultValue="Manufacturer Model" />
+		
+		<EditTextPreference
+			android:key="service_date"
+			android:title="Date of last service" 
+			android:summary="What was your vehicle's last date of service"
+			android:dialogTitle="Service Date"
+			android:dialogMessage="Please specify your vehicle's last date of service"	
+			android:defaultValue="mm/dd/yyyy" />
+
+	</PreferenceCategory>
+	
+</PreferenceScreen>

@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="11"
+        android:minSdkVersion="14"
         android:targetSdkVersion="16" />
 
     <uses-feature
@@ -29,7 +29,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.auto.vsn.MainActivity"
+            android:name="com.auto.vsn.InterfaceActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -68,6 +68,30 @@
         <activity
             android:name="com.auto.vsn.UserStatActivity"
             android:label="@string/title_activity_user_stat" >
+        </activity>
+        <activity
+            android:name="com.auto.vsn.MainActivity"
+            android:label="@string/title_activity_interface" >
+        </activity>
+        <activity
+            android:name="com.auto.vsn.FriendTab"
+            android:label="@string/title_activity_friend_tab" >
+        </activity>
+        <activity
+            android:name="com.auto.vsn.PersonalTab"
+            android:label="@string/title_activity_personal_tab" >
+        </activity>
+        <activity
+            android:name="com.auto.vsn.TripTab"
+            android:label="@string/title_activity_trip_tab" >
+        </activity>
+        <activity
+            android:name="com.auto.vsn.SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
+        <activity
+            android:name="com.auto.vsn.TripEditActivity"
+            android:label="@string/title_activity_trip_edit" >
         </activity>
     </application>
 

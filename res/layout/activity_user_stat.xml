@@ -8,9 +8,100 @@
         android:id="@+id/user_stat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/record"
         android:scrollbars="vertical"
-        android:text="@string/hello_world" />
+        android:gravity="center"
+        android:text="" />
+    
+    <fragment
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/gauge"
+        class="com.google.android.gms.maps.MapFragment"
+        map:cameraTargetLat="49.220737"
+        map:cameraTargetLng="-123.106613"
+        map:cameraTilt="30"
+        map:cameraZoom="16" />
+
+    <ImageView
+        android:id="@+id/gauge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/gauge" />
+ 
+    <Button
+        android:id="@+id/record"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:onClick="logData"
+        android:text="Record" />
+
+    <TextView
+        android:id="@+id/econ"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/user_stat"
+        android:layout_marginTop="26dp"
+        android:gravity="center"
+        android:scrollbars="vertical"
+        android:text="Econ: unavailable"
+        android:textSize="45px" />
+
+    <TextView
+        android:id="@+id/distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/econ"
+        android:gravity="center"
+        android:scrollbars="vertical"
+        android:text="Distance: unavailable"
+        android:textSize="28px" />
+
+    <TextView
+        android:id="@+id/throttle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/econ"
+        android:layout_marginTop="18dp"
+        android:gravity="center"
+        android:scrollbars="vertical"
+        android:text="Throttle: unavailable"
+        android:textSize="28px" />
+
+    <ImageView
+        android:id="@+id/needle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/gauge"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="34dp"
+        android:src="@drawable/needle" />
+
+    <TextView
+        android:id="@+id/level"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/throttle"
+        android:gravity="center"
+        android:scrollbars="vertical"
+        android:text="Fuel Remaining: unavailable"
+        android:textSize="28px" />
 
 </RelativeLayout>

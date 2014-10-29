@@ -137,7 +137,7 @@ public class MainActivity extends FragmentActivity {
 	    uiHelper.onSaveInstanceState(outState);
 	}
 	
-	
+	// Intents to other Activities
 	public void viewMap(View view) {
 	    Intent intent = new Intent(this, MapActivity.class);
 	    startActivity(intent);
@@ -145,6 +145,11 @@ public class MainActivity extends FragmentActivity {
 	
 	public void viewStat(View view) {
 		Intent intent = new Intent(this, UserStatActivity.class);
+		startActivity(intent);
+	}
+	
+	public void viewInterface(View view) {
+		Intent intent = new Intent(this, InterfaceActivity.class);
 		startActivity(intent);
 	}
 	
