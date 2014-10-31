@@ -16,14 +16,25 @@
 
 package com.auto.bt;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+
 import com.auto.vsn.R;
+import com.auto.writer.DataWriter;
+import com.google.android.gms.maps.model.LatLng;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -86,6 +97,9 @@ public class BluetoothChat<ImageView> extends Activity {
     private BluetoothAdapter mBluetoothAdapter = null;
     // Member object for the chat services
     private BluetoothChatService mChatService = null;
+    
+    // For data writing
+    private DataWriter data = new DataWriter();
 
 
     @Override
@@ -217,47 +231,59 @@ public class BluetoothChat<ImageView> extends Activity {
 
 	public void getData(int messagenumber) {
 	
-		// final TextView TX = (TextView) findViewById(R.id.TXView2); 
-		
 		switch(messagenumber) {
-    	
-        	case 1:
-        		sendMessage("01 0C" + '\r'); //get RPM
-        //		TX.setText("01 0C");
-        		messagenumber++;
-        		break;
-        		
-        	case 2:
-        		sendMessage("01 0D" + '\r'); //get MPH
-        //		TX.setText("01 0D");
-        		messagenumber++;
-        		break;
-        	case 3:
-        		sendMessage("01 04" + '\r'); //get Engine Load
-        //		TX.setText("01 04");
-        		messagenumber++;
-        		break;
-        	case 4:
-        		sendMessage("01 05" + '\r'); //get Coolant Temperature
-        //		TX.setText("01 05");
-        		messagenumber++;
-        		break;
-        	case 5:
-        		sendMessage("01 0F" + '\r'); //get Intake Temperature
-        //		TX.setText("01 0F");
-        		messagenumber++;
-        		break;
-        	
-        	case 6:
-        		sendMessage("AT RV" + '\r'); //get Voltage
-        //		TX.setText("AT RV");
-        		messagenumber++;
-        		break;
-        		
+		
+			case 1: // get RPM
+				sendMessage("01 0C" + "\r");
+				messagenumber++;
+				break;
+		
+			case 2: // get Speed (km/h)
+				sendMessage("01 0D" + "\r");
+				messagenumber++;
+				break;
+				
+			case 3: // get throttle
+				sendMessage("01 11" + "\r");
+				messagenumber++;
+				break;
+				
+			case 4: // get Fuel Level
+				sendMessage("01 2F" + "\r");
+				messagenumber++;
+				break;
+				
+			case 5: // get distance travelled
+				sendMessage("01 31" + "\r");
+				messagenumber++;
+				break;
+				
+			case 6: // get Coordinates
+				fetchCoordinates();
+				messagenumber++;
+				break;
+				
+			case 7: // get Fuel_Econ
+				// TODO something here
+				messagenumber++;
+				break;
+
         	default: ; 		 
 		}
     }
     
+	// get Coordinates code
+	
+	private void fetchCoordinates() {
+		
+		LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE); 
+		Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		this.data.setLng(location.getLongitude());
+		this.data.setLat(location.getLatitude());
+		
+	}
+	
+
 	/*
     public void clearCodes() {
     	
@@ -354,14 +380,9 @@ public class BluetoothChat<ImageView> extends Activity {
         actionBar.setSubtitle(subTitle);
     }
 
-    
-    //Contains previous value of parameters for gauge transition
-    int prev_intake = 0;
-	int prev_load = 0;
-	int prev_coolant = 0;
-	int prev_MPH = 0;
-	int prev_RPM = 0;
-	int prev_voltage = 0;
+ 
+    //Contains previous value of parameters
+    int prev_dist = 0;
 	
     
 
@@ -372,33 +393,9 @@ public class BluetoothChat<ImageView> extends Activity {
         @Override
         public void handleMessage(Message msg) {
         	
-        	//<--------- Initialize Data Display Fields ---------->//    	
-        	//final TextView RPM = (TextView) findViewById(R.id.RPMView); 
-        	//final TextView MPH = (TextView) findViewById(R.id.MPHView); 
-        	//final TextView engineLoad = (TextView) findViewById(R.id.LoadView);
-        	//final TextView coolantTemperature = (TextView) findViewById(R.id.CoolantView); 
-        	//final TextView intakeTemperature = (TextView) findViewById(R.id.IntakeView); 
-        	//final TextView voltage = (TextView) findViewById(R.id.voltView); 
-        	//final TextView RX = (TextView) findViewById(R.id.RXView2); 
-        	
-        	//<-------- Initialize Needle Animations --------->//
-        	//final ImageView pointer;
-        	//final ImageView pointer1;
-        	//final ImageView pointer2;
-        	//final ImageView pointer3;
-        	//final ImageView pointer4;
-        	//final ImageView pointer5;
-        	//final ImageView pointer6;
-        	//pointer = (ImageView) findViewById(R.id.imageView1);
-        	//pointer1 = (ImageView) findViewById(R.id.ImageView2);
-        	//pointer2 = (ImageView) findViewById(R.id.ImageView3);
-        	//pointer3 = (ImageView) findViewById(R.id.ImageView4);
-        	//pointer4 = (ImageView) findViewById(R.id.ImageView5);
-        	//pointer5 = (ImageView) findViewById(R.id.ImageView6);
-        	
         	String dataRecieved;
-        	int value = 0;
-        	int value2 = 0;
+        	int a = 0;
+        	int b = 0;
         	int PID = 0;
         	
         	
@@ -446,148 +443,54 @@ public class BluetoothChat<ImageView> extends Activity {
 	        			if((bytes[0] != null)&&(bytes[1] != null)) {
 	        				
 	        				PID = Integer.parseInt(bytes[0].trim(), 16);
-	        				value = Integer.parseInt(bytes[1].trim(), 16); 
+	        				a = Integer.parseInt(bytes[1].trim(), 16); 
 	        				}
 	        			
 
 	        		switch(PID) {
 	            	
-		            	case 15://PID(0F): Intake Temperature
-		            		
-		            		value = value - 40; //Formula for Intake Temperature
-		                    value = ((value * 9)/ 5) + 32; //Convert from Celsius to Farenheit 
-		                    String displayIntakeTemp = String.valueOf(value);
-		                	//intakeTemperature.setText(displayIntakeTemp);
-		                    
-		                    int needle_value = (((value-30) * 21)/10) - 105;
-		                    /*
-			                    if(prev_intake == 0) {
-			                    	RotateAnimation Intake_animation = new RotateAnimation(-105, needle_value, 30, 97);
-			                    	prev_intake = needle_value;
-			                    	Intake_animation.setInterpolator(new LinearInterpolator());
-				            	    Intake_animation.setDuration(500);
-				            	    Intake_animation.setFillAfter(true);
-				            	 //   ((View) pointer4).startAnimation(Intake_animation); 
-			                    }
-			                    else {
-			                    	RotateAnimation Intake_animation = new RotateAnimation(prev_intake, needle_value, 30, 97);
-			                    	prev_intake = needle_value;
-			                    	Intake_animation.setInterpolator(new LinearInterpolator());
-				            	    Intake_animation.setDuration(500);
-				            	    Intake_animation.setFillAfter(true);
-				            	//    ((View) pointer4).startAnimation(Intake_animation); 
-			                    }
-		                    */
-		                    
+	        			case 12: //PID(0C): RPM
+	        				
+	        				int rpm_value = (a * 256) / 4; // formula for RPM from PID
+	        				data.setRPM(rpm_value);
 		            		break;
 		            		
-
-		            	case 4://PID(04): Engine Load
-		            		
-		            		value = (value * 100 ) / 255;
-		            		needle_value = ((value * 21)/10) - 105;
-		              	  	String displayEngineLoad = String.valueOf(value);
-		              	  	/*
-			              	  if(prev_load == 0) {
-			                    	prev_load = needle_value;
-			                    	RotateAnimation Load_animation = new RotateAnimation(-105, needle_value, 30, 97);
-				              	  	Load_animation.setInterpolator(new LinearInterpolator());
-				              	  	Load_animation.setDuration(500);
-				              	  	Load_animation.setFillAfter(true);
-				              	//    ((View) pointer2).startAnimation(Load_animation); 
-			                    }
-			                    else {
-			                    	RotateAnimation Load_animation = new RotateAnimation(prev_load, needle_value, 30, 97);
-			                    	prev_load = needle_value;
-				              	  	Load_animation.setInterpolator(new LinearInterpolator());
-				              	  	Load_animation.setDuration(500);
-				              	  	Load_animation.setFillAfter(true);
-				             // 	    ((View) pointer2).startAnimation(Load_animation); 
-			                    }
-		              	  	*/
-		              	  //	engineLoad.setText(displayEngineLoad);
-		            		break;
-		            		
-		            	case 5://PID(05): Coolant Temperature
-		            		
-		            		value = value - 40;
-		            		value = ((value * 9)/ 5) + 32; //convert to deg F
-		            		needle_value = (((value-50) * 21)/20) - 105;
-		            		/*
-			            		if(prev_coolant == 0) {
-				            		RotateAnimation Coolant_animation = new RotateAnimation(-83, needle_value, 30, 97);
-				            		Coolant_animation.setInterpolator(new LinearInterpolator());
-				             	    Coolant_animation.setDuration(500);
-				             	    Coolant_animation.setFillAfter(true);
-				             //	    ((View) pointer3).startAnimation(Coolant_animation);
-				             	    prev_coolant = needle_value;
-			            		}
-			            		else {
-			            			RotateAnimation Coolant_animation = new RotateAnimation(prev_coolant, needle_value, 30, 97);
-				            		Coolant_animation.setInterpolator(new LinearInterpolator());
-				             	    Coolant_animation.setDuration(500);
-				             	    Coolant_animation.setFillAfter(true);
-				             //	    ((View) pointer3).startAnimation(Coolant_animation);
-				             	    prev_coolant = needle_value;
-			            		}
-		            		*/
-		             	    String displayCoolantTemp = String.valueOf(value);
-		               
-		             	  //  coolantTemperature.setText(displayCoolantTemp);
-		            		break;
-		            	
-		            	case 12: //PID(0C): RPM
-		                		int RPM_value = (value*256)/4;
-		                		needle_value = ((RPM_value * 22)/1000) - 85;
-		                		/*
-		                		if(prev_RPM == 0) {
-		    	            		RotateAnimation RPM_animation = new RotateAnimation(-85, needle_value, 30, 97);
-		    	            		RPM_animation.setInterpolator(new LinearInterpolator());
-		    	            	    RPM_animation.setDuration(500);
-		    	            	    RPM_animation.setFillAfter(true);
-		    	            	    ((View) pointer).startAnimation(RPM_animation);
-		    	            	    prev_RPM = needle_value;
-		                		}
-		                		else {
-		                			RotateAnimation RPM_animation = new RotateAnimation(prev_RPM, needle_value, 30, 97);
-		    	            		RPM_animation.setInterpolator(new LinearInterpolator());
-		    	            	    RPM_animation.setDuration(500);
-		    	            	    RPM_animation.setFillAfter(true);
-		    	            	    ((View) pointer).startAnimation(RPM_animation);
-		    	            	    prev_RPM = needle_value;
-		                		}
-		                		*/
-		                		String displayRPM = String.valueOf(RPM_value);
-		                 	//    RPM.setText(displayRPM);
-		            		break;
-		            		
-		            		
-		            	case 13://PID(0D): MPH
-		            		
-		            		value = (value * 5) / 8; //convert KPH to MPH
-		            		needle_value = ((value * 21)/20) - 85;
-		            		/*
-			            		if(prev_MPH == 0) {
-				            		RotateAnimation MPH_animation = new RotateAnimation(-85, needle_value, 30, 97);
-				            		MPH_animation.setInterpolator(new LinearInterpolator());
-				             	    MPH_animation.setDuration(500);
-				             	    MPH_animation.setFillAfter(true);
-				             //	    ((View) pointer1).startAnimation(MPH_animation);
-				             	    prev_MPH = needle_value;
-			            		}
-			            		else {
-			            			RotateAnimation MPH_animation = new RotateAnimation(prev_MPH, needle_value, 30, 97);
-				            		MPH_animation.setInterpolator(new LinearInterpolator());
-				             	    MPH_animation.setDuration(500);
-				             	    MPH_animation.setFillAfter(true);
-				             	//    ((View) pointer1).startAnimation(MPH_animation);
-				             	    prev_MPH = needle_value;
-			            		}
-		            		*/
-		             	    String displayMPH = String.valueOf(value);
-		            	   // MPH.setText(displayMPH);
-		            		break;
-		            		
+	        			case 13: //PID(0D): Speed (km/h)
+	        				
+	        				int speed_value = a; // formula for Speed from PID
+	        				data.setSpeed(speed_value);
+	        				break;
+	        				
+	        			case 17: //PID(11): Throttle Position
+	        				
+	        				int throttle_percentage = (a * 100) / 255; // formula for throttle position from PID
+	        				data.setThrottle(throttle_percentage);
+	        				break;
+	        				
+	        			case 47: //PID(2F): Fuel Level
+	        				
+	        				int remaining_fuel = (a * 100) / 255; // formula for fuel level from PID
+	        				data.setFuelLevel(remaining_fuel);
+	        				break;
+	        				
+	        			case 49: //PID(31): Distance Traveled after MIL cleared
+	        				
+	        				int distance = a * 256; // formula for distance traveled from PID
+	        				
+	        				if (prev_dist == 0) { // initial data pull, the car is stationary
+	        					
+	        					prev_dist = distance;
+	        					data.setDistance(distance - prev_dist);
+	        					
+	        				} else { // the car is moving, distance = newDist - oldDist
+	        					
+	        					data.setDistance(distance - prev_dist);
+	        					prev_dist = distance; // the newDist is now the oldDist for next data pulling
+	        					
+	        				}
+	        				
+	        				break;
+		            			            		            		
 		            	default: ;
 
 	        		}
@@ -601,151 +504,62 @@ public class BluetoothChat<ImageView> extends Activity {
     			if((bytes[0] != null)&&(bytes[1] != null)&&(bytes[2] != null)) {
     				
     				PID = Integer.parseInt(bytes[0].trim(), 16);
-    				value = Integer.parseInt(bytes[1].trim(), 16);
-    				value2 = Integer.parseInt(bytes[2].trim(), 16);
+    				a = Integer.parseInt(bytes[1].trim(), 16);
+    				b = Integer.parseInt(bytes[2].trim(), 16);
+    				
     			}
     			
     			//PID(0C): RPM
             	if(PID == 12) {
             		
-            		int RPM_value = ((value*256)+value2)/4;
-            		int needle_value = ((RPM_value * 22)/1000) - 85;
-            		/*
-            		if(prev_RPM == 0) {
-	            		RotateAnimation RPM_animation = new RotateAnimation(-85, needle_value, 30, 97);
-	            		RPM_animation.setInterpolator(new LinearInterpolator());
-	            	    RPM_animation.setDuration(500);
-	            	    RPM_animation.setFillAfter(true);
-	            	    ((View) pointer).startAnimation(RPM_animation);
-	            	    prev_RPM = needle_value;
-            		}
-            		else {
-            			RotateAnimation RPM_animation = new RotateAnimation(prev_RPM, needle_value, 30, 97);
-	            		RPM_animation.setInterpolator(new LinearInterpolator());
-	            	    RPM_animation.setDuration(500);
-	            	    RPM_animation.setFillAfter(true);
-	            	    ((View) pointer).startAnimation(RPM_animation);
-	            	    prev_RPM = needle_value;
-            		}
-            		*/
-            		String displayRPM = String.valueOf(RPM_value);
-             	   // RPM.setText(displayRPM);
-            	} 
-            	else if((PID == 1)||(PID == 65)) {
+            		int rpm_value = ((a * 256) + b) / 4;
+            		data.setRPM(rpm_value);
+            	
+            	//PID(31): Distance Traveled after MIL cleared
+            	} else if(PID == 49) {
             		
-            		switch(value) {
+            		int distance = (a * 256) + b;
+            		
+    				if (prev_dist == 0) {
+    					
+    					prev_dist = distance;
+    					data.setDistance(distance - prev_dist);
+    					
+    				} else {
+    					
+    					data.setDistance(distance - prev_dist);
+    					prev_dist = distance;
+    					
+    				}
+            		
+            	} else if((PID == 1)||(PID == 65)) {
+            		
+            		switch(a) {
 	            	
-			            	case 15://PID(0F): Intake Temperature
+        				case 13: //PID(0D): Speed (km/h)
+        				
+        					int speed_value = b;
+        					data.setSpeed(speed_value);
+        					break;
+        				
+        				case 17: //PID(11): Throttle Position
+        				
+        					int throttle_percentage = (b * 100) / 255;
+        					data.setThrottle(throttle_percentage);
+        					break;
+        				
+        				case 47: //PID(2F): Fuel Level
+        				
+        					int remaining_fuel = (b * 100) / 255;
+        					data.setFuelLevel(remaining_fuel);
+        					break;
 			            		
-			            		value2 = value2 - 40; //formula for INTAKE AIR TEMP
-			                    value2 = ((value2 * 9)/ 5) + 32; //convert to deg F
-			                    int needle_value = (((value2-30) * 21)/10) - 105;
-			                    /*
-				                    if(prev_intake == 0) {
-				                    	RotateAnimation Intake_animation = new RotateAnimation(-105, needle_value, 30, 97);
-				                    	prev_intake = needle_value;
-				                    	Intake_animation.setInterpolator(new LinearInterpolator());
-					            	    Intake_animation.setDuration(500);
-					            	    Intake_animation.setFillAfter(true);
-					            	//    ((View) pointer4).startAnimation(Intake_animation); 
-				                    }
-				                    else {
-				                    	RotateAnimation Intake_animation = new RotateAnimation(prev_intake, needle_value, 30, 97);
-				                    	prev_intake = needle_value;
-				                    	Intake_animation.setInterpolator(new LinearInterpolator());
-					            	    Intake_animation.setDuration(500);
-					            	    Intake_animation.setFillAfter(true);
-					            	//    ((View) pointer4).startAnimation(Intake_animation); 
-				                    }
-			                    */
-			                    String displayIntakeTemp = String.valueOf(value2);
-			            //    	intakeTemperature.setText(displayIntakeTemp);
-			            		break;
-			            		
-			            	case 4://PID(04): Engine Load
-			            		
-			            		value2 = (value2 * 100 ) / 255;
-			              	  	String displayEngineLoad = String.valueOf(value2);
-			              	  	needle_value = ((value2 * 21)/10) - 105;
-			              	  	/*
-				              	  if(prev_load == 0) {
-				                    	prev_load = needle_value;
-				                    	RotateAnimation Load_animation = new RotateAnimation(-105, needle_value, 30, 97);
-					              	  	Load_animation.setInterpolator(new LinearInterpolator());
-					              	  	Load_animation.setDuration(500);
-					              	  	Load_animation.setFillAfter(true);
-					              	//    ((View) pointer2).startAnimation(Load_animation); 
-				                    }
-				                    else {
-				                    	RotateAnimation Load_animation = new RotateAnimation(prev_load, needle_value, 30, 97);
-				                    	prev_load = needle_value;
-					              	  	Load_animation.setInterpolator(new LinearInterpolator());
-					              	  	Load_animation.setDuration(500);
-					              	  	Load_animation.setFillAfter(true);
-					              	 //   ((View) pointer2).startAnimation(Load_animation); 
-				                    }
-				                 */			                
-			              //	  	engineLoad.setText(displayEngineLoad);
-			            		break;
-			            		
-			            	case 5://PID(05): Coolant Temperature
-			            		
-			            		value2 = value2 - 40;
-			            		value2 = ((value2 * 9)/ 5) + 32; //convert to deg F
-			            		needle_value = (((value2-50) * 21)/20) - 105;
-			            		/*
-				            		if(prev_coolant == 0) {
-					            		RotateAnimation Coolant_animation = new RotateAnimation(-83, needle_value, 30, 97);
-					            		Coolant_animation.setInterpolator(new LinearInterpolator());
-					             	    Coolant_animation.setDuration(500);
-					             	    Coolant_animation.setFillAfter(true);
-					             //	    ((View) pointer3).startAnimation(Coolant_animation);
-					             	    prev_coolant = needle_value;
-				            		}
-				            		else {
-				            			RotateAnimation Coolant_animation = new RotateAnimation(prev_coolant, needle_value, 30, 97);
-					            		Coolant_animation.setInterpolator(new LinearInterpolator());
-					             	    Coolant_animation.setDuration(500);
-					             	    Coolant_animation.setFillAfter(true);
-					             	//    ((View) pointer3).startAnimation(Coolant_animation);
-					             	    prev_coolant = needle_value;
-				            		}
-			             	    */
-			             	    String displayCoolantTemp = String.valueOf(value2);
-			             	 //   coolantTemperature.setText(displayCoolantTemp);
-			            		break;
-			            		
-			            	case 13://PID(0D): MPH
-			            		
-			            		value2 = (value2 * 5) / 8; //convert to MPH
-			            		needle_value = ((value2 * 21)/20) - 85;
-			            		/*
-				            		if(prev_MPH == 0) {
-					            		RotateAnimation MPH_animation = new RotateAnimation(-85, needle_value, 30, 97);
-					            		MPH_animation.setInterpolator(new LinearInterpolator());
-					             	    MPH_animation.setDuration(500);
-					             	    MPH_animation.setFillAfter(true);
-					             //	    ((View) pointer1).startAnimation(MPH_animation);
-					             	    prev_MPH = needle_value;
-				            		}
-				            		else {
-				            			RotateAnimation MPH_animation = new RotateAnimation(prev_MPH, needle_value, 30, 97);
-					            		MPH_animation.setInterpolator(new LinearInterpolator());
-					             	    MPH_animation.setDuration(500);
-					             	    MPH_animation.setFillAfter(true);
-					             //	    ((View) pointer1).startAnimation(MPH_animation);
-					             	    prev_MPH = needle_value;
-				            		}
-			             	    */
-			            		String displayMPH = String.valueOf(value2);
-			            	//    MPH.setText(displayMPH);
-			            		break;
-			            		
-			            	default: ;
-            				}
+			            default: ;
+            		}
             	}
             	
             }
+            /*
             else if((dataRecieved != null) && (dataRecieved.matches("\\s*[0-9]+(\\.[0-9]?)?V\\s*\r*\n*" ))) {
             	
             	dataRecieved = dataRecieved.trim();
@@ -753,7 +567,7 @@ public class BluetoothChat<ImageView> extends Activity {
             	double needle_value = Double.parseDouble(volt_number);
             	needle_value = (((needle_value - 11)*21) /0.5) - 100;
             	int volt_value = (int)(needle_value);
-            	/*
+            	
 	            	if(prev_voltage == 0) {
 		            	RotateAnimation Voltage_animation = new RotateAnimation(-100, volt_value, 30, 97);
 		            	Voltage_animation.setInterpolator(new LinearInterpolator());
@@ -770,7 +584,7 @@ public class BluetoothChat<ImageView> extends Activity {
 		        	 //   ((View) pointer5).startAnimation(Voltage_animation); 
 		            	prev_voltage = volt_value;
 	            	}
-	            */
+	            
             	//voltage.setText(dataRecieved);
             	
             } 
@@ -781,7 +595,7 @@ public class BluetoothChat<ImageView> extends Activity {
             	double needle_value = Double.parseDouble(volt_number);
             	needle_value = (((needle_value - 11)*21) /0.5) - 100;
             	int volt_value = (int)(needle_value);
-            	/*
+            	
 	            	if(prev_voltage == 0) {
 		            	RotateAnimation Voltage_animation = new RotateAnimation(-100, volt_value, 30, 97);
 		            	Voltage_animation.setInterpolator(new LinearInterpolator());
@@ -798,19 +612,35 @@ public class BluetoothChat<ImageView> extends Activity {
 		        	//    ((View) pointer5).startAnimation(Voltage_animation); 
 		            	prev_voltage = volt_value;
 	            	} 
-            	*/
+            	
             	//voltage.setText(dataRecieved);
             	
             }    
+            */
             else if((dataRecieved != null) && (dataRecieved.matches("\\s*[ .A-Za-z0-9\\?*>\r\n]*\\s*>\\s*\r*\n*" ))) {
             	
-            	if(message_number == 7) message_number = 1;
-            	getData(message_number++);
+            	if(message_number == 8) {
+            		
+            		data.setTime();
+            		
+            		try {
+						data.write();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+            		
+            		message_number = 1;
+            		
+            	} else {
+            		
+            		getData(message_number++);
+            		
+            	}
+            	
             }
-            else {
-        		
-        		;	
-        	}
+            else { 
+            	;
+            }
                 
  
                 //mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);

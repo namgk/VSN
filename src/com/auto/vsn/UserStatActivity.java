@@ -52,6 +52,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class UserStatActivity extends Activity {
+	
 	ArrayList<TripData> storedTrips = new ArrayList<TripData>();
 	TripData trip = new TripData();
 	TripData sample = new TripData();
@@ -129,7 +130,7 @@ public class UserStatActivity extends Activity {
 		String line = "";
 		
 		if(sdDir != null) {
-			log = new File(sdDir + "/torqueLogs/", "trackLog.csv");
+			log = new File(sdDir + "/sdLogs/", "trackLog.csv");
 			//log = new File(sdDir, "Test.csv");
 		}
 		if(log != null) {
@@ -142,40 +143,38 @@ public class UserStatActivity extends Activity {
 				     String[] RowData = line.split(",");
 					
 			    	 trip.addTime(RowData[0]); // Time Stamp
-				     trip.addCoordinate(new LatLng(Double.parseDouble(RowData[3]), Double.parseDouble(RowData[2])));
-				     if(!RowData[12].equals("-"))
-				    	 trip.addThrottle(Double.parseDouble(RowData[12])); // Throttle %
+				     trip.addCoordinate(new LatLng(Double.parseDouble(RowData[2]), Double.parseDouble(RowData[3])));
+				     if(!RowData[5].equals("-"))
+				    	 trip.addThrottle(Double.parseDouble(RowData[5])); // Throttle %
 				     else
 				    	 trip.addThrottle(0.0);
-				     if(!RowData[13].equals("-"))
-				    	 trip.addRpm(Double.parseDouble(RowData[13])); // Engine RPM
+				     if(!RowData[4].equals("-"))
+				    	 trip.addRpm(Double.parseDouble(RowData[4])); // Engine RPM
 				     else
 				    	 trip.addRpm(0.0);
-				     if(!RowData[14].equals("-"))
-				    	 trip.addSpeed(Integer.parseInt(RowData[14])); // Speed
+				     if(!RowData[1].equals("-"))
+				    	 trip.addSpeed(Integer.parseInt(RowData[1])); // Speed
 				     else
 				    	 trip.addSpeed(0);
-				     if(RowData[16].equals("-"))
+				     if(RowData[7].equals("-"))
 				    	 trip.addDistance(0.0);
 				     else {
-				    	 trip.addDistance(Double.parseDouble(RowData[16])); // Trip Distance
+				    	 trip.addDistance(Double.parseDouble(RowData[7])); // Trip Distance
 				    	 //System.out.println(Double.parseDouble(RowData[16]));
 				     }
-				     if(RowData[17].equals("-"))
+				     if(RowData[6].equals("-"))
 				    	 trip.addFuelLevel(0.0);
 				     else
-				    	 trip.addFuelLevel(Double.parseDouble(RowData[17])); // Fuel Level
-				     if(RowData[19].equals("-") || !RowData[19].contains("."))
+				    	 trip.addFuelLevel(Double.parseDouble(RowData[6])); // Fuel Level
+				     if(RowData[8].equals("-") || !RowData[8].contains("."))
 				    	 trip.addFuelEcon(0.0);
 				     else
-				    	 trip.addFuelEcon(Double.parseDouble(RowData[19])); // L/100km (Average)*/
+				    	 trip.addFuelEcon(Double.parseDouble(RowData[8])); // L/100km (Average)*/
 				     
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -190,7 +189,7 @@ public class UserStatActivity extends Activity {
 		int length = 0;
 		
 		if(sdDir != null) {
-			log = new File(sdDir + "/torqueLogs/", "trackLog.csv");
+			log = new File(sdDir + "/sdLogs/", "trackLog.csv");
 			//log = new File(sdDir, "Test.csv");
 		}
 		if(log != null) {
@@ -202,11 +201,9 @@ public class UserStatActivity extends Activity {
 					}
 					return length;
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -217,6 +214,9 @@ public class UserStatActivity extends Activity {
 		recordData = !recordData;
 		
 		if(recordData) {
+			
+			// TODO have startTransmission() in BluetoothChat.java here to start parsing when recording starts
+			
 			Toast.makeText(UserStatActivity.this, "Data Logging Enabled", Toast.LENGTH_SHORT).show();
 			trip.clearTrip();
 			trip.setTripNo(db.getTripCount() + 1);
@@ -319,7 +319,6 @@ public class UserStatActivity extends Activity {
 
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			System.out.println("LogTask is completed by Java timer");
 		}
 		
@@ -363,12 +362,10 @@ public class UserStatActivity extends Activity {
 
 		 public myView(Context context) {
 		  super(context);
-		  // TODO Auto-generated constructor stub
 		 }
 
 		 @Override
 		 protected void onDraw(Canvas canvas) {
-		  // TODO Auto-generated method stub
 		  Bitmap gauge = BitmapFactory.decodeResource(getResources(), R.drawable.gauge);
 		  Bitmap dial = BitmapFactory.decodeResource(getResources(), R.drawable.needle);
 		          canvas.drawBitmap(gauge, 0, 0, null);
