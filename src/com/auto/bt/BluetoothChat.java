@@ -157,6 +157,8 @@ public class BluetoothChat<ImageView> extends Activity {
     //keep track of current PID number
     int message_number = 1;
     
+    boolean recordData = false;
+    
     private void setupChat() {
         Log.d(TAG, "setupChat()");
 
@@ -186,27 +188,19 @@ public class BluetoothChat<ImageView> extends Activity {
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
         
-        startTransmission();
-        /*
-        //---Get Vehicle Data Button---
-        final ToggleButton getDataButton = (ToggleButton) findViewById(R.id.toggleButton1);
-        getDataButton.setOnClickListener(new View.OnClickListener() 
-        {
-        	
-            public void onClick(View v) {
- 
-            	if(getDataButton.isChecked()) {
-            		startTransmission();
-            	}
-            	else {
-            		message_number = 0;
-            	}
-
-            }
-        });
-        
-        */
-        
+    	final Button button = (Button) findViewById(R.id.record);
+    	button.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {				
+				recordData = !recordData;
+				
+				if(recordData)
+					startTransmission();			
+			}
+    	
+    	});
+            
         /*
         //---Clear Trouble Codes Button---
         Button getCodesButton = (Button) findViewById(R.id.button2);
@@ -221,6 +215,25 @@ public class BluetoothChat<ImageView> extends Activity {
         */
        
     }
+    
+/*   
+    public void startDataParsing() {
+    	
+    	Button button = (Button) findViewById(R.id.record);
+    	button.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {				
+				recordData = !recordData;
+				
+				if(recordData)
+					startTransmission();			
+			}
+    	
+    	});
+    	
+    }
+ */
     
     public void startTransmission() {
     	
@@ -237,37 +250,37 @@ public class BluetoothChat<ImageView> extends Activity {
 				sendMessage("01 0C" + "\r");
 				messagenumber++;
 				break;
-		
-			case 2: // get Speed (km/h)
-				sendMessage("01 0D" + "\r");
-				messagenumber++;
-				break;
 				
-			case 3: // get throttle
+			case 2: // get throttle
 				sendMessage("01 11" + "\r");
 				messagenumber++;
 				break;
 				
-			case 4: // get Fuel Level
+			case 3: // get Fuel Level
 				sendMessage("01 2F" + "\r");
 				messagenumber++;
 				break;
+		
+			case 4: // get Speed (km/h)
+				sendMessage("01 0D" + "\r");
+				messagenumber++;
+				break;
 				
-			case 5: // get distance travelled
+			case 5: // get MAF air flow rate
+				sendMessage("01 10" + "\r");
+				messagenumber++;
+				break;
+				
+			case 6: // get distance travelled
 				sendMessage("01 31" + "\r");
 				messagenumber++;
 				break;
 				
-			case 6: // get Coordinates
+			case 7: // get Coordinates
 				fetchCoordinates();
 				messagenumber++;
 				break;
 				
-			case 7: // get Fuel_Econ
-				// TODO something here
-				messagenumber++;
-				break;
-
         	default: ; 		 
 		}
     }
@@ -383,6 +396,9 @@ public class BluetoothChat<ImageView> extends Activity {
  
     //Contains previous value of parameters
     int prev_dist = 0;
+    
+    //Instantaneous vehicle speed in km/h to caculate fuel economy in MPG (miles per gallon)
+    int vss = 0;
 	
     
 
@@ -458,7 +474,34 @@ public class BluetoothChat<ImageView> extends Activity {
 	        			case 13: //PID(0D): Speed (km/h)
 	        				
 	        				int speed_value = a; // formula for Speed from PID
+	        				vss = speed_value;
 	        				data.setSpeed(speed_value);
+	        				break;
+	        				
+	        			case 16: //PID(10): MAF
+	        				
+	        				int maf = (a * 256); // formula for MAF in 100g/s
+	        				
+	        				/*
+	        				 To calculate instantaneous fuel consumption in MPG (miles per gallon),
+	        				 we use the formula:
+	        				 
+	        				 fuel economy (MPG) = (14.7 * 6.17 * 454 * 0.621371 * VSS) / (3600 * (MAF / 100))
+	        									= (710.7 * VSS) / MAF
+	        									  
+	        				 in which: 14.7 = ideal air/fuel ratio for gasoline
+	        						   6.17 = density of gasoline
+	        				 		   454 = grams per pound conversion
+	        				 		   0.621371 = miles per hour/kilometers per hour conversion
+	        				 		   3600 = seconds per hour conversion
+	        				 		   100 = modify MAF value into g/s (notice the maf I've pulled is in 100g/s)
+	        						   VSS - vehicle speed in km/h
+	        						   MAF - mass air flow rate in 100g/s
+	        				*/
+	        				
+	        				double fuel_econ_val = (710.7 * vss) / maf; // formula for fuel economy in MPG (see above)
+	        					   fuel_econ_val = 235.2 * fuel_econ_val; // converting MPG(US) into L/100km
+	        				data.setFuelEcon(fuel_econ_val);
 	        				break;
 	        				
 	        			case 17: //PID(11): Throttle Position
@@ -514,6 +557,14 @@ public class BluetoothChat<ImageView> extends Activity {
             		
             		int rpm_value = ((a * 256) + b) / 4;
             		data.setRPM(rpm_value);
+            		
+            	//PID(10): MAF
+            	} else if(PID == 16) {
+            		
+            		int maf = ((a * 256) + b);
+            		double fuel_econ_val = (710.7 * vss) / maf;
+            			   fuel_econ_val = 235.2 * fuel_econ_val; // converting MPG(US) into L/100km
+            		data.setFuelEcon(fuel_econ_val);
             	
             	//PID(31): Distance Traveled after MIL cleared
             	} else if(PID == 49) {
@@ -539,6 +590,7 @@ public class BluetoothChat<ImageView> extends Activity {
         				case 13: //PID(0D): Speed (km/h)
         				
         					int speed_value = b;
+        					vss = speed_value;
         					data.setSpeed(speed_value);
         					break;
         				
@@ -706,30 +758,6 @@ public class BluetoothChat<ImageView> extends Activity {
         inflater.inflate(R.menu.activity_establish_bt, menu);
         return true;
     }
-
-    /*
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        Intent serverIntent = null;
-        switch (item.getItemId()) {
-        case R.id.secure_connect_scan:
-            // Launch the DeviceListActivity to see devices and do scan
-            serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
-            return true;
-        case R.id.insecure_connect_scan:
-            // Launch the DeviceListActivity to see devices and do scan
-            serverIntent = new Intent(this, DeviceListActivity.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_INSECURE);
-            return true;
-        case R.id.discoverable:
-            // Ensure this device is discoverable by others
-            ensureDiscoverable();
-            return true;
-        }
-        return false;
-    }
-    */
     
 }
 

@@ -24,7 +24,7 @@ public class Authenticated extends Fragment {
 	
 	private Session.StatusCallback callback = new Session.StatusCallback() {
 	    @Override
-	    public void call(final Session session, final SessionState state, final Exception exception) {
+	    public void call(Session session, SessionState state, Exception exception) {
 	        onSessionStateChange(session, state, exception);
 	    }
 	};
@@ -95,15 +95,15 @@ public class Authenticated extends Fragment {
 
 			@Override
 			public void onCompleted(GraphUser user, Response response) {
-				// TODO Auto-generated method stub
-				if(session == Session.getActiveSession()) {
-					if(user != null) {
+				
+				if(session == Session.getActiveSession() && user != null) {
+					
 						profilePictureView.setProfileId(user.getId());
 						userNameView.setText(user.getName());
-					}
+						
 				}
 				if(response.getError() != null) {
-					// Handle errors, will do later
+					// TODO Handle errors, will do later
 				}
 			}
 			

@@ -223,7 +223,7 @@ public class MapActivity extends Activity {
 		String line = "";
 		
 		if(sdDir != null) {
-			log = new File(sdDir, "torqueTrackLog.csv");
+			log = new File(sdDir + "/sdLogs/", "TripDataLog.csv");
 		}
 		if(log != null) {
 			try {
@@ -232,29 +232,31 @@ public class MapActivity extends Activity {
 					while ((line = reader.readLine()) != null) {
 					     String[] RowData = line.split(",");
 					     
-					     if(!RowData[0].equals("GPS Time")) {
-					    	 trip.addTime(RowData[0]); // Time Stamp
-						     trip.addCoordinate(new LatLng(Double.parseDouble(RowData[3]), Double.parseDouble(RowData[2])));
-						     trip.addThrottle(Double.parseDouble(RowData[12])); // Throttle %
-						     trip.addRpm(Double.parseDouble(RowData[13])); // Engine RPM
-						     trip.addSpeed(Integer.parseInt(RowData[14])); // Speed
-						     if(RowData[16].equals("-"))
+					     if(!RowData[0].equals("System Time")) {
+					    	 trip.addTime(RowData[0]); // Time
+					    	 trip.addSpeed(Integer.parseInt(RowData[1])); // Speed
+						     trip.addCoordinate(new LatLng(Double.parseDouble(RowData[2]), Double.parseDouble(RowData[3])));
+						     trip.addRpm(Double.parseDouble(RowData[4])); // RPM
+						     trip.addThrottle(Double.parseDouble(RowData[5])); // Throttle %
+						     trip.addFuelLevel(Double.parseDouble(RowData[6])); // Fuel Level
+						     
+						     if(RowData[7].equals("-")) {
 						    	 trip.addDistance(0.0);
-						     else
-						    	 trip.addDistance(Double.parseDouble(RowData[16])); // Trip Distance
-						     trip.addFuelLevel(Double.parseDouble(RowData[17])); // Fuel Level
-						     if(RowData[19].equals("-"))
+						     } else {
+						    	 trip.addDistance(Double.parseDouble(RowData[7])); // Trip Distance
+						     }
+						     
+						     if(RowData[8].equals("-")) {
 						    	 trip.addFuelEcon(0.0);
-						     else
-						    	 trip.addFuelEcon(Double.parseDouble(RowData[19])); // L/100 km (Average)*/
+						     } else {
+						    	 trip.addFuelEcon(Double.parseDouble(RowData[8])); // Fuel Economy
+						     }
 					     }
 					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

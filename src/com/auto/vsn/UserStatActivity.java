@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.auto.bt.BluetoothChat;
 import com.auto.data.TripData;
 import com.auto.data.DatabaseHandler;
 import com.auto.data.Accelerometer;
@@ -130,7 +131,7 @@ public class UserStatActivity extends Activity {
 		String line = "";
 		
 		if(sdDir != null) {
-			log = new File(sdDir + "/sdLogs/", "trackLog.csv");
+			log = new File(sdDir + "/sdLogs/", "TripDataLog.csv");
 			//log = new File(sdDir, "Test.csv");
 		}
 		if(log != null) {
@@ -141,35 +142,54 @@ public class UserStatActivity extends Activity {
 					     line = reader.readLine();
 					}
 				     String[] RowData = line.split(",");
-					
-			    	 trip.addTime(RowData[0]); // Time Stamp
-				     trip.addCoordinate(new LatLng(Double.parseDouble(RowData[2]), Double.parseDouble(RowData[3])));
-				     if(!RowData[5].equals("-"))
-				    	 trip.addThrottle(Double.parseDouble(RowData[5])); // Throttle %
-				     else
-				    	 trip.addThrottle(0.0);
-				     if(!RowData[4].equals("-"))
-				    	 trip.addRpm(Double.parseDouble(RowData[4])); // Engine RPM
-				     else
-				    	 trip.addRpm(0.0);
-				     if(!RowData[1].equals("-"))
-				    	 trip.addSpeed(Integer.parseInt(RowData[1])); // Speed
-				     else
+					 
+				     // Time
+			    	 trip.addTime(RowData[0]);
+			    	 
+			    	 // Speed
+			    	 if(!RowData[1].equals("-")) {
+				    	 trip.addSpeed(Integer.parseInt(RowData[1]));
+				     } else {
 				    	 trip.addSpeed(0);
-				     if(RowData[7].equals("-"))
-				    	 trip.addDistance(0.0);
-				     else {
-				    	 trip.addDistance(Double.parseDouble(RowData[7])); // Trip Distance
-				    	 //System.out.println(Double.parseDouble(RowData[16]));
 				     }
-				     if(RowData[6].equals("-"))
+			    	 
+			    	 // LatLng
+				     trip.addCoordinate(new LatLng(Double.parseDouble(RowData[2]), Double.parseDouble(RowData[3])));
+				     
+				     // RPM
+				     if(!RowData[4].equals("-")) {
+				    	 trip.addRpm(Double.parseDouble(RowData[4]));
+				     } else {
+				    	 trip.addRpm(0.0);
+				     } 
+				     
+				     // Throttle %
+				     if(!RowData[5].equals("-")) {
+				    	 trip.addThrottle(Double.parseDouble(RowData[5]));
+				     } else {
+				    	 trip.addThrottle(0.0);
+				     } 
+				     
+				     // Fuel Level
+				     if(RowData[6].equals("-")) {
 				    	 trip.addFuelLevel(0.0);
-				     else
-				    	 trip.addFuelLevel(Double.parseDouble(RowData[6])); // Fuel Level
-				     if(RowData[8].equals("-") || !RowData[8].contains("."))
+				     } else {
+				    	 trip.addFuelLevel(Double.parseDouble(RowData[6]));
+				     } 
+				     
+				     // Trip Distance
+				     if(RowData[7].equals("-")) {
+				    	 trip.addDistance(0.0);
+				     } else {
+				    	 trip.addDistance(Double.parseDouble(RowData[7]));
+				     }
+				  		
+				     // Fuel Economy
+				     if(RowData[8].equals("-") || !RowData[8].contains(".")) {
 				    	 trip.addFuelEcon(0.0);
-				     else
-				    	 trip.addFuelEcon(Double.parseDouble(RowData[8])); // L/100km (Average)*/
+				     } else {
+				    	 trip.addFuelEcon(Double.parseDouble(RowData[8]));
+				     }
 				     
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -189,7 +209,7 @@ public class UserStatActivity extends Activity {
 		int length = 0;
 		
 		if(sdDir != null) {
-			log = new File(sdDir + "/sdLogs/", "trackLog.csv");
+			log = new File(sdDir + "/sdLogs/", "TripDataLog.csv");
 			//log = new File(sdDir, "Test.csv");
 		}
 		if(log != null) {
@@ -209,13 +229,11 @@ public class UserStatActivity extends Activity {
 		}
 		return length;
 	}
-	
+
 	public void logData(View view) {
 		recordData = !recordData;
 		
 		if(recordData) {
-			
-			// TODO have startTransmission() in BluetoothChat.java here to start parsing when recording starts
 			
 			Toast.makeText(UserStatActivity.this, "Data Logging Enabled", Toast.LENGTH_SHORT).show();
 			trip.clearTrip();
@@ -287,7 +305,7 @@ public class UserStatActivity extends Activity {
 			timer.cancel();
 			timer2.cancel();
 			
-			/*Ask the user if they want to save the trip if recorded*/
+			// Ask the user if they want to save the trip if recorded
 			
 		    // 1. Instantiate an AlertDialog.Builder with its constructor
 		    AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -323,7 +341,7 @@ public class UserStatActivity extends Activity {
 		}
 		
 	}
-	
+
 	public static void updateAccelerometer(double x, double y, double z) {
 		System.out.println("This shit is being called.");
 		xAxis = x;
@@ -376,10 +394,10 @@ public class UserStatActivity extends Activity {
 	 public String warnDriver() {
 		if(trip.getThrottle().size() > 2) {
 			if(trip.getThrottle(trip.size()-1) - trip.getThrottle(trip.size()-2) > 10 && trip.getRpm(trip.size()-1) - trip.getRpm(trip.size()-2) > 500 && trip.getSpeed(trip.size()-2) > 5) {
-				return "Plz Sthap";
+				return "Plz Stahp!";
 			}
 	 	}
-	 	return "Your Alright";
+	 	return "You're Alright";
 	 }
 	 
 }

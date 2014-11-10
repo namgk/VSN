@@ -83,15 +83,15 @@ public class DataWriter {
             
             FileWriter fw = new FileWriter(file);
             BufferedWriter writer = new BufferedWriter( fw );
-            writer.write("Time");
-            writer.write("Speed (km/h");
+            writer.write("System Time");
+            writer.write("Speed (km/h)");
             writer.write("Latitude");
             writer.write("Longitude");
             writer.write("RPM");
             writer.write("Throttle %");
             writer.write("Fuel Level %");
             writer.write("Distance Travelled (km)");
-            writer.write("Fuel Economy (insert unit"); // TODO
+            writer.write("Fuel Economy (L/100km)");
             writer.newLine();
 
             writer.write(this.time);							// RowData[0]
