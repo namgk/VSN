@@ -4,6 +4,7 @@
     <string name="app_name">Social Drive</string>
     <string name="app_id">384749178309933</string>
     <string name="android_key">AIzaSyCLM8OuvCC_BKcqeL2uHJT7Nkn4nDgbzLE</string>
+    <string name="map_api_key">AIzaSyB5Y0Mtfz3hnAW200MK_hi9iEAYtfyqiHA</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_authentication">Authentication</string>
