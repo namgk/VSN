@@ -24,6 +24,7 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.auto.vsn.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -44,11 +45,15 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyC_48zVfVsB4ehRDRDvrkqffIR1gOQHgF4" />
+            android:value="@string/map_api_key" />
         
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/app_id" />
+        
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/com.google.android.gms.version" />
 
         <activity
             android:name="com.facebook.LoginActivity"
@@ -63,8 +68,12 @@
             android:label="@string/title_activity_authenticated" />
 
         <activity
-            android:name="com.auto.vsn.EstablishBT"
-            android:label="@string/title_activity_establish_bt" />
+            android:name="com.auto.bt.BluetoothChat"
+            android:label="@string/title_activity_bluetooth" />
+        
+        <activity
+            android:name="com.auto.bt.DeviceListActivity"
+            android:label="@string/title_activity_device_list" />
 
         <activity
             android:name="com.auto.vsn.MapActivity"
@@ -97,6 +106,7 @@
         <activity
             android:name="com.auto.vsn.TripEditActivity"
             android:label="@string/title_activity_trip_edit" />
+
     </application>
 
 </manifest>

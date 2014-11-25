@@ -5,8 +5,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.os.Environment;
 
 public class DataWriter {
@@ -72,10 +75,15 @@ public class DataWriter {
 		this.fuel_econ = fuel_econ;
 	}
 	
+	@SuppressLint("SimpleDateFormat")
 	public void write() throws IOException {
 		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+		Date date = new Date();
+		String today = sdf.format(date);
+		
 		File sdDir = Environment.getExternalStorageDirectory();
-		File file = new File(sdDir + "/sdLogs/", "TripDataLog.csv");  
+		File file = new File(sdDir + "/sdLogs/", today + ".csv");  
 		
         if ( !file.exists() ) {
         	

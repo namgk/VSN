@@ -14,6 +14,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.auto.bt.BluetoothChat;
+import com.auto.bt.DeviceListActivity;
 import com.auto.data.TripData;
 import com.auto.data.DatabaseHandler;
 import com.auto.data.Accelerometer;
@@ -31,6 +32,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -65,6 +67,7 @@ public class UserStatActivity extends Activity {
 	TextView throttle;
 	TextView fuel;
 	
+	static final int PAIR_DEVICE_REQUEST = 100;
 	
 	int num_trips = 0;
 	int prev_length = 0;
@@ -200,16 +203,21 @@ public class UserStatActivity extends Activity {
 		}
 	}
 	
+	@SuppressLint("SimpleDateFormat")
 	public int getLogLength() {
 		//num_trips = db.getTripCount();
 		// Parsing Code
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+		Date date = new Date();
+		String today = sdf.format(date);
+		
 		File sdDir = Environment.getExternalStorageDirectory();
 		File log = null;
 		String line = "";
 		int length = 0;
 		
 		if(sdDir != null) {
-			log = new File(sdDir + "/sdLogs/", "TripDataLog.csv");
+			log = new File(sdDir + "/sdLogs/", today + ".csv");
 			//log = new File(sdDir, "Test.csv");
 		}
 		if(log != null) {
@@ -219,6 +227,7 @@ public class UserStatActivity extends Activity {
 					while ((line = reader.readLine()) != null) {
 						length++;
 					}
+					reader.close();
 					return length;
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -363,8 +372,8 @@ public class UserStatActivity extends Activity {
 	   Intent intent;	 
        switch (item.getItemId()) {
        case R.id.menuitem1:
-    	   intent = new Intent(this, UserStatActivity.class);
-   	       startActivity(intent);
+    	   intent = new Intent(this, DeviceListActivity.class);
+   	       startActivityForResult(intent, PAIR_DEVICE_REQUEST);
     	   break;
        case R.id.menuitem2:
     	   intent = new Intent(this, SettingsActivity.class);
@@ -375,6 +384,32 @@ public class UserStatActivity extends Activity {
        }
        return true;
      }
+	 
+	 @Override
+	 protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		 
+		 // Check for the if the result is the "right" one
+		 if(requestCode == PAIR_DEVICE_REQUEST) {
+			 
+			 // There are only 2 possible results, OK and CANCELED
+			 // If the result is OK, Bluetooth is successfully paired and we just do nothing UserStat
+			 if(resultCode == RESULT_OK) {
+				 Toast.makeText(UserStatActivity.this,
+						 "Bluetooth device paired", Toast.LENGTH_SHORT).show();
+			 }
+			 
+			 // If the result is CANCELED, it means either the user backs off from DeviceList
+			 // or the user failed to find a Bluetooth Device to pair. Give them a Bluetooth
+			 // environment not found reminder message.
+			 if(resultCode == RESULT_CANCELED) {
+				 Toast.makeText(UserStatActivity.this, 
+						 "Bluetooth not supported or paired", Toast.LENGTH_SHORT).show();				 
+			 }
+			 			 
+		 }
+
+	 }
+	 
 	 
 	 private class myView extends ImageView{
 

@@ -19,6 +19,7 @@ package com.auto.bt;
 import java.util.Set;
 
 import com.auto.vsn.R;
+import com.auto.vsn.UserStatActivity;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -159,8 +160,16 @@ public class DeviceListActivity extends Activity {
         public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
             // Cancel discovery because it's costly and we're about to connect
             mBtAdapter.cancelDiscovery();
+            
+            // If there are no device and user still decides to click on the noDevice string, do nothing and finish
+            if(((TextView) v).getText().toString() == getResources().getText(R.string.none_found).toString()) {
+            	
+            	setResult(Activity.RESULT_CANCELED, new Intent());
+            	finish();
+            	
+            } else {
 
-            // Get the device MAC address, which is the last 17 chars in the View
+            // Else get the device MAC address, which is the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
 
@@ -169,8 +178,10 @@ public class DeviceListActivity extends Activity {
             intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
 
             // Set result and finish this Activity
-            setResult(Activity.RESULT_OK, intent);
+            setResult(Activity.RESULT_OK, intent);         
             finish();
+            
+            }
         }
     };
 

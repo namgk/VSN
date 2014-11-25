@@ -7,8 +7,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import com.auto.data.DatabaseHandler;
@@ -36,6 +38,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -216,14 +219,20 @@ public class MapActivity extends Activity {
 		return true;
 	}
 	
+	@SuppressLint("SimpleDateFormat")
 	public void readStorage() {
 		// Parsing Code
-		File sdDir = Environment.getExternalStorageDirectory();
+		// TODO Only works on the same day, need to change this later
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+		Date date = new Date();
+		String today = sdf.format(date);
+		
+		File sdDir = Environment.getExternalStorageDirectory(); 
 		File log = null;
 		String line = "";
 		
 		if(sdDir != null) {
-			log = new File(sdDir + "/sdLogs/", "TripDataLog.csv");
+			log = new File(sdDir + "/sdLogs/", today + ".csv");
 		}
 		if(log != null) {
 			try {

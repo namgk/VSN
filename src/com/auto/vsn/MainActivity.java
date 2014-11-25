@@ -11,7 +11,9 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
+import android.widget.Toast;
 
+import com.auto.bt.DeviceListActivity;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
@@ -20,6 +22,8 @@ public class MainActivity extends FragmentActivity {
 	private static final int AUTHENTICATION = 0;
 	private static final int AUTHENTICATED = 1;
 	private static final int FRAGMENT_COUNT = AUTHENTICATED +1;
+	
+	static final int PAIR_DEVICE_REQUEST = 100;
 
 	private Fragment[] fragments = new Fragment[FRAGMENT_COUNT];
 	private boolean isResumed = false;
@@ -121,6 +125,31 @@ public class MainActivity extends FragmentActivity {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		
+		// Check for the if the result is the "right" one
+		if(requestCode == PAIR_DEVICE_REQUEST) {
+					 
+			// There are only 2 possible results, OK and CANCELED
+			// If the result is OK, it means Bluetooth is successfully paired and we can start UserStat
+			if(resultCode == RESULT_OK) {
+				Intent intent = new Intent(this, UserStatActivity.class);
+				startActivity(intent);
+				Toast.makeText(MainActivity.this,
+						 "Bluetooth device paired", Toast.LENGTH_SHORT).show();
+			}
+					 
+			// If the result is CANCELED, it means either the user backs off from DeviceList
+			// or the user failed to find a Bluetooth Device to pair. Give them a Bluetooth
+			// environment not found reminder message.
+			if(resultCode == RESULT_CANCELED) {
+				Intent intent = new Intent(this, UserStatActivity.class);
+				startActivity(intent);
+				Toast.makeText(MainActivity.this, 
+						"Bluetooth not supported or paired", Toast.LENGTH_SHORT).show();				 
+			}
+					 			 
+		}
+		
 	    super.onActivityResult(requestCode, resultCode, data);
 	    uiHelper.onActivityResult(requestCode, resultCode, data);
 	}
@@ -144,8 +173,8 @@ public class MainActivity extends FragmentActivity {
 	}
 	
 	public void viewStat(View view) {
-		Intent intent = new Intent(this, UserStatActivity.class);
-		startActivity(intent);
+		Intent intent = new Intent(this, DeviceListActivity.class);
+		startActivityForResult(intent, PAIR_DEVICE_REQUEST);
 	}
 	
 	public void viewInterface(View view) {

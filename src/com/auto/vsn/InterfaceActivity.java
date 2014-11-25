@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.auto.bt.DeviceListActivity;
 import com.auto.data.DatabaseHandler;
 import com.auto.data.TripData;
 import com.auto.tab.FriendTab;
@@ -49,6 +50,8 @@ public class InterfaceActivity extends FragmentActivity {
 	static ViewPager mViewPager;
 	int selectedPosition;
 	static int curr_tab = 0;
+	
+	static final int PAIR_DEVICE_REQUEST = 100;
 
 	DatabaseHandler db;
 	
@@ -199,8 +202,8 @@ public class InterfaceActivity extends FragmentActivity {
 	   Intent intent;	 
        switch (item.getItemId()) {
        case R.id.menuitem1:
-    	   intent = new Intent(this, UserStatActivity.class);
-   	       startActivity(intent);
+    	   intent = new Intent(this, DeviceListActivity.class);
+   	       startActivityForResult(intent, PAIR_DEVICE_REQUEST);
     	   break;
        case R.id.menuitem2:
     	   intent = new Intent(this, SettingsActivity.class);
@@ -211,6 +214,35 @@ public class InterfaceActivity extends FragmentActivity {
        }
        return true;
      }
+ 	 
+ 	@Override
+ 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+ 		
+ 		// Check for the if the result is the "right" one
+ 		if(requestCode == PAIR_DEVICE_REQUEST) {
+ 					 
+ 			// There are only 2 possible results, OK and CANCELED
+ 			// If the result is OK, it means Bluetooth is successfully paired and we can start UserStat
+ 			if(resultCode == RESULT_OK) {
+ 				Intent intent = new Intent(this, UserStatActivity.class);
+ 				startActivity(intent);
+ 				Toast.makeText(InterfaceActivity.this,
+ 						 "Bluetooth device paired", Toast.LENGTH_SHORT).show();
+ 			}
+ 					 
+ 			// If the result is CANCELED, it means either the user backs off from DeviceList
+ 			// or the user failed to find a Bluetooth Device to pair. Give them a Bluetooth
+ 			// environment not found reminder message.
+ 			if(resultCode == RESULT_CANCELED) {
+ 				Intent intent = new Intent(this, UserStatActivity.class);
+ 				startActivity(intent);
+ 				Toast.makeText(InterfaceActivity.this, 
+ 						"Bluetooth not supported or paired", Toast.LENGTH_SHORT).show();				 
+ 			}
+ 					 			 
+ 		}
+ 		
+ 	}
  	 
  	 public static int getTabPos() {
  		 return curr_tab;
