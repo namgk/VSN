@@ -81,6 +81,13 @@ public class BluetoothChat<ImageView> extends Activity {
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
+    
+    // Values to identify user's car engine fuel type
+    private final int GASOLINE = 100;
+    private final int HYBRID = 200;
+    private final int ELECTRIC = 300;
+    
+    private int engineFuelType;
 
     // Layout Views
     private ListView mConversationView;
@@ -188,6 +195,8 @@ public class BluetoothChat<ImageView> extends Activity {
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
         
+        sendMessage("01 51" + "\r");
+        
     	final Button button = (Button) findViewById(R.id.record);
     	button.setOnClickListener(new View.OnClickListener() {
 			
@@ -243,45 +252,53 @@ public class BluetoothChat<ImageView> extends Activity {
     
 
 	public void getData(int messagenumber) {
+		
+		if(this.engineFuelType == GASOLINE) {
 	
-		switch(messagenumber) {
+			switch(messagenumber) {
 		
-			case 1: // get RPM
-				sendMessage("01 0C" + "\r");
-				messagenumber++;
-				break;
+				case 1: // get RPM
+					sendMessage("01 0C" + "\r");
+					messagenumber++;
+					break;
 				
-			case 2: // get throttle
-				sendMessage("01 11" + "\r");
-				messagenumber++;
-				break;
+				case 2: // get throttle
+					sendMessage("01 11" + "\r");
+					messagenumber++;
+					break;
 				
-			case 3: // get Fuel Level
-				sendMessage("01 2F" + "\r");
-				messagenumber++;
-				break;
+				case 3: // get Fuel Level
+					sendMessage("01 2F" + "\r");
+					messagenumber++;
+					break;
 		
-			case 4: // get Speed (km/h)
-				sendMessage("01 0D" + "\r");
-				messagenumber++;
-				break;
+				case 4: // get Speed (km/h)
+					sendMessage("01 0D" + "\r");
+					messagenumber++;
+					break;
 				
-			case 5: // get MAF air flow rate
-				sendMessage("01 10" + "\r");
-				messagenumber++;
-				break;
+				case 5: // get MAF air flow rate
+					sendMessage("01 10" + "\r");
+					messagenumber++;
+					break;
 				
-			case 6: // get distance travelled
-				sendMessage("01 31" + "\r");
-				messagenumber++;
-				break;
+				case 6: // get distance travelled
+					sendMessage("01 31" + "\r");
+					messagenumber++;
+					break;
 				
-			case 7: // get Coordinates
-				fetchCoordinates();
-				messagenumber++;
-				break;
+				case 7: // get Coordinates
+					fetchCoordinates();
+					messagenumber++;
+					break;
 				
-        	default: ; 		 
+				default: ; 	
+        	
+			}
+		} else if(this.engineFuelType == ELECTRIC) {
+			// TODO do something
+		} else if(this.engineFuelType == HYBRID) {
+			// TODO do something
 		}
     }
     
@@ -533,6 +550,19 @@ public class BluetoothChat<ImageView> extends Activity {
 	        				}
 	        				
 	        				break;
+	        				
+	        			case 81: // PID(51): Engine Fuel Type
+	        				
+	        				if(a == 1) 
+	        					engineFuelType = GASOLINE;
+	        				
+	        				if(a == 8) 
+	        					engineFuelType = ELECTRIC;
+	        				
+	        				if((a == 17) || (a == 20)) 
+	        					engineFuelType = HYBRID;
+	        				
+	        				break;	        				
 		            			            		            		
 		            	default: ;
 
@@ -605,6 +635,19 @@ public class BluetoothChat<ImageView> extends Activity {
         					int remaining_fuel = (b * 100) / 255;
         					data.setFuelLevel(remaining_fuel);
         					break;
+        					
+        				case 81: // PID(51): Engine Fuel Type
+	        				
+	        				if(b == 1) 
+	        					engineFuelType = GASOLINE;
+	        				
+	        				if(b == 8) 
+	        					engineFuelType = ELECTRIC;
+	        				
+	        				if((b == 17) || (b == 20)) 
+	        					engineFuelType = HYBRID;
+	        				
+	        				break;       					
 			            		
 			            default: ;
             		}
