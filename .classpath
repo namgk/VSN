@@ -5,10 +5,5 @@
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="lib" path="E:/Development/ex_lib/httpmime-4.0.jar"/>
-	<classpathentry kind="lib" path="E:/Development/ex_lib/httpmime-4.0-alpha3.jar"/>
-	<classpathentry kind="lib" path="E:/Development/ex_lib/httpmime-4.0-alpha4.jar"/>
-	<classpathentry kind="lib" path="E:/Development/ex_lib/httpmime-4.0-beta1.jar"/>
-	<classpathentry kind="lib" path="E:/Development/ex_lib/httpmime-4.0-beta2.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
