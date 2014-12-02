@@ -61,6 +61,8 @@
     <string name="edit_trip_desc">Please provide a description of this trip.</string>
     <string name="save">Save</string>
     
+    <string name="title_activity_upload">Uploader</string>
+    
     <!-- Integrated from OBDIIMonitor -->
     
     <string name="bt_not_enabled_leaving">Bluetooth was not enabled. Leaving Bluetooth Chat.</string>
