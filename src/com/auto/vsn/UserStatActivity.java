@@ -2,6 +2,7 @@ package com.auto.vsn;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -126,6 +127,24 @@ public class UserStatActivity extends Activity {
 		throttle = (TextView) findViewById(R.id.throttle);
 		fuel = (TextView) findViewById(R.id.level);
 	}
+
+	public static File lastFileModified(String dir) {
+	    File fl = new File(dir);
+	    File[] files = fl.listFiles(new FileFilter() {          
+	        public boolean accept(File file) {
+	            return file.isFile();
+	        }
+	    });
+	    long lastMod = Long.MIN_VALUE;
+	    File latestFile = null;
+	    for (File file : files) {
+	        if (file.lastModified() > lastMod) {
+	            latestFile = file;
+	            lastMod = file.lastModified();
+	        }
+	    }
+	    return latestFile;
+	}
 	
 	public void readLine(int row) {
 		// Parsing Code
@@ -134,7 +153,7 @@ public class UserStatActivity extends Activity {
 		String line = "";
 		
 		if(sdDir != null) {
-			log = new File(sdDir + "/sdLogs/", "TripDataLog.csv");
+			log = lastFileModified(sdDir + "/sdLogs/");
 			//log = new File(sdDir, "Test.csv");
 		}
 		if(log != null) {
@@ -217,7 +236,7 @@ public class UserStatActivity extends Activity {
 		int length = 0;
 		
 		if(sdDir != null) {
-			log = new File(sdDir + "/sdLogs/", today + ".csv");
+			log = lastFileModified(sdDir + "/sdLogs/");
 			//log = new File(sdDir, "Test.csv");
 		}
 		if(log != null) {

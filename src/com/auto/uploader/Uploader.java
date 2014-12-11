@@ -1,6 +1,7 @@
 package com.auto.uploader;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -17,7 +18,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
+//import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -48,7 +50,7 @@ import android.widget.Toast;
 
 public class Uploader extends Activity {
 
-	public static final String LogUpLoad_Data = "Log_Data";
+	public static final String UPLOAD_DATA = "Log_Data";
 	protected static final int LENGTH_SHORT = 0;
 	SharedPreferences settings; 
 	SharedPreferences.Editor prefEditor;
@@ -68,6 +70,9 @@ public class Uploader extends Activity {
 	//TextView textViewMD5key = null;
 	TextView textViewSetTime = null;
 	//TextView textViewMD5data = null;
+	
+	MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+	File sdDir = android.os.Environment.getExternalStorageDirectory();
 
 	int intFacebookID = 0;
 	
@@ -112,9 +117,27 @@ public class Uploader extends Activity {
 	static String bin2hex(byte[] data) {
 	    return String.format("%0" + (data.length*2) + "X", new BigInteger(1, data));
 	}
-
-	// TODO
-	FileObserver observer = new FileObserver(android.os.Environment.getExternalStorageDirectory().toString() + "/torqueLogs/trackLog.csv") 
+	
+	public static File lastFileModified(String dir) {
+	    File fl = new File(dir);
+	    File[] files = fl.listFiles(new FileFilter() {          
+	        public boolean accept(File file) {
+	            return file.isFile();
+	        }
+	    });
+	    long lastMod = Long.MIN_VALUE;
+	    File latestFile = null;
+	    for (File file : files) {
+	        if (file.lastModified() > lastMod) {
+	            latestFile = file;
+	            lastMod = file.lastModified();
+	        }
+	    }
+	    return latestFile;
+	}
+	
+	// TODO	
+	FileObserver observer = new FileObserver(lastFileModified(sdDir + "/torqueLogs/").getPath()) 
 	{ // set up a file observer to watch this directory on sd card
         @Override
 	    public void onEvent(int event, String file) 
@@ -136,7 +159,7 @@ public class Uploader extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		settings = getSharedPreferences(LogUpLoad_Data, MODE_PRIVATE);
+		settings = getSharedPreferences(UPLOAD_DATA, MODE_PRIVATE);
 		prefEditor = settings.edit();
 
 		prefEditor.putInt("FacebookID", 0);
@@ -179,7 +202,6 @@ public class Uploader extends Activity {
 		return true;
 	}
 	
-	// TODO
 	public class UploadTorqueLog extends AsyncTask<String, String, Integer>{
 		Context mContext = null;
 		String Message = "";
@@ -190,7 +212,7 @@ public class Uploader extends Activity {
 		@Override
 		protected Integer doInBackground(String... arg0) {
 
-		  	settings = getSharedPreferences(LogUpLoad_Data, MODE_PRIVATE);
+		  	settings = getSharedPreferences(UPLOAD_DATA, MODE_PRIVATE);
 
 		  	if ((System.currentTimeMillis() - settings.getLong("LastTime", 0))>10000)
         	{
@@ -205,15 +227,19 @@ public class Uploader extends Activity {
 		        	HttpResponse response = null;
 		        	HttpClient httpclient = new DefaultHttpClient();
 		            HttpPost httppost = new HttpPost("http://54.172.173.31/upload.php");
-		            File LogFileLocation= new File(android.os.Environment.getExternalStorageDirectory().toString() + "/torqueLogs/trackLog.csv"); // TODO
+		            File LogFileLocation= lastFileModified(sdDir + "/torqueLogs/");
 		            FileBody file2upload = new FileBody(LogFileLocation);
 		            //StringBody FaceBookIDtemp = new StringBody("" + intFacebookID);
 		            
 		            //nameValuePairs.add(new BasicNameValuePair("id", "" + intFacebookID));
 	
-		            MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-	
-					reqEntity.addPart("LogFile", file2upload);
+		            // MultipartEntity reqEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+		            
+		            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+		           	builder.addPart("LogFile", file2upload);
+		           	
+		           	HttpEntity reqEntity = builder.build();
+		           	
 					//reqEntity.addPart("id", FaceBookIDtemp);
 					//httppost.addHeader(nameValuePairs.get(0).getName(), nameValuePairs.get(0).getValue());
 					httppost.addHeader("id", "" + intFacebookID);
@@ -226,9 +252,8 @@ public class Uploader extends Activity {
 	
 		            System.out.println("executing request " + httppost.getRequestLine());
 					
-		            // TODO
-					File directory = new File(android.os.Environment.getExternalStorageDirectory().toString() + "/torqueLogs/");
-					File from      = new File(directory, "trackLog.csv");
+					File directory = new File(sdDir + "/torqueLogs/");
+					File from      = new File(directory, lastFileModified(sdDir + "/torqueLogs/").getName());
 					if (from.length() > 1000)
 			        {
 						
@@ -286,7 +311,7 @@ public class Uploader extends Activity {
 
 	     }
 
-	     protected void onPostExecute(Integer mvalid){ // TODO
+	     protected void onPostExecute(Integer mvalid){
     		if(mvalid == 0) 
 	    	{
         		Toast.makeText(getApplicationContext(), "Torque Log Uploaded for ID:\n" + intFacebookID , LENGTH_SHORT).show();
@@ -408,7 +433,7 @@ public class Uploader extends Activity {
 			}else
 			{
 				observer.startWatching();
-				textViewSetTime.setText("Torque Log Upload frequency: every 10s after edit"); // TODO
+				textViewSetTime.setText("Torque Log Upload frequency: every 10s after edit");
 			}
 			
 			//Update the UI

@@ -2,6 +2,7 @@ package com.auto.vsn;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -219,20 +220,33 @@ public class MapActivity extends Activity {
 		return true;
 	}
 	
+	public static File lastFileModified(String dir) {
+	    File fl = new File(dir);
+	    File[] files = fl.listFiles(new FileFilter() {          
+	        public boolean accept(File file) {
+	            return file.isFile();
+	        }
+	    });
+	    long lastMod = Long.MIN_VALUE;
+	    File latestFile = null;
+	    for (File file : files) {
+	        if (file.lastModified() > lastMod) {
+	            latestFile = file;
+	            lastMod = file.lastModified();
+	        }
+	    }
+	    return latestFile;
+	}
+	
 	@SuppressLint("SimpleDateFormat")
 	public void readStorage() {
-		// Parsing Code
-		// TODO Only works on the same day, need to change this later
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
-		Date date = new Date();
-		String today = sdf.format(date);
-		
+		// Parsing Code		
 		File sdDir = Environment.getExternalStorageDirectory(); 
 		File log = null;
 		String line = "";
 		
 		if(sdDir != null) {
-			log = new File(sdDir + "/sdLogs/", today + ".csv");
+			log = lastFileModified(sdDir + "/sdLogs/");
 		}
 		if(log != null) {
 			try {

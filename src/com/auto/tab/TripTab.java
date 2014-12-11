@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.auto.data.DatabaseHandler;
 import com.auto.data.TripData;
+import com.auto.uploader.Uploader;
 import com.auto.vsn.InterfaceActivity;
 import com.auto.vsn.MapActivity;
 import com.auto.vsn.R;
@@ -122,8 +123,9 @@ public class TripTab extends ListFragment {
 	 	      
 	 	    if(curr_tab == 2) {
 		    	menu.setHeaderTitle("Trip Options");
-		        menu.add(1, 1, 1, "Edit Trip Details"); 
-		        menu.add(1, 2, 2, "Delete");
+		    	menu.add(1, 1, 1, "Upload");
+		        menu.add(1, 2, 2, "Edit Trip Details"); 
+		        menu.add(1, 3, 3, "Delete");
 	 	    }
 	 	}
 	 	
@@ -136,13 +138,18 @@ public class TripTab extends ListFragment {
 	       
 	 	      if(curr_tab == 2) {
 	 	    	  if(itemId == 1) {
+	 	    	  	 // Bring up uploader for selected trip
+	 	    	  	 Intent intent = new Intent(getActivity(), Uploader.class);
+	 	    	  	 startActivity(intent);	 	    	  	 
+	 	      	  }
+	 	    	  else if(itemId == 2) {
 	 	    		 // Edit selected trip
 	 	    		 Intent intent = new Intent(getActivity(), TripEditActivity.class);
 	 	    		 String pos = Integer.toString(curr_row + 1);
 	 	             intent.putExtra(EXTRA_MESSAGE, pos);
 	 	    		 startActivity(intent);
 	 	  	      }
-	 	    	  else if(itemId == 2) {
+	 	    	  else if(itemId == 3) {
 	 	    		 //Toast.makeText(getActivity(), "Delete Trip", Toast.LENGTH_SHORT).show();
 	 			      // 1. Instantiate an AlertDialog.Builder with its constructor
 	 		    	  AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

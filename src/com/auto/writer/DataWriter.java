@@ -24,6 +24,8 @@ public class DataWriter {
 	private double dist;
 	private double fuel_econ;
 	
+	File currentFile;
+	
 	public DataWriter() {
 		
 		this.speed = 0;
@@ -35,6 +37,47 @@ public class DataWriter {
 		this.dist = 0;
 		this.fuel_econ = 0;
 		setTime();
+		initialize();
+		
+	}
+	
+	@SuppressLint("SimpleDateFormat")
+	public void initialize() {
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HH-mm-ss");
+		Date date = new Date();
+		String today = sdf.format(date);
+		
+		File sdDir = Environment.getExternalStorageDirectory();
+		File file = new File(sdDir + "/sdLogs/", "sdLog_" + today + ".csv");	
+		
+		currentFile = file;
+		
+		try {
+			
+			FileWriter fw = new FileWriter(file);
+	        BufferedWriter writer = new BufferedWriter( fw );
+			
+			file.createNewFile();
+			
+			writer.write("System Time");
+            writer.write("Speed (km/h)");
+            writer.write("Latitude");
+            writer.write("Longitude");
+            writer.write("RPM");
+            writer.write("Throttle %");
+            writer.write("Fuel Level %");
+            writer.write("Distance Travelled (km)");
+            writer.write("Fuel Economy (L/100km)");
+            writer.newLine();
+            
+    		writer.flush();
+    		writer.close();
+    		fw.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -75,69 +118,27 @@ public class DataWriter {
 		this.fuel_econ = fuel_econ;
 	}
 	
-	@SuppressLint("SimpleDateFormat")
 	public void write() throws IOException {
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
-		Date date = new Date();
-		String today = sdf.format(date);
-		
-		File sdDir = Environment.getExternalStorageDirectory();
-		File file = new File(sdDir + "/sdLogs/", today + ".csv");  
-		
-        if ( !file.exists() ) {
-        	
-            file.createNewFile();
-            
-            FileWriter fw = new FileWriter(file);
-            BufferedWriter writer = new BufferedWriter( fw );
-            writer.write("System Time");
-            writer.write("Speed (km/h)");
-            writer.write("Latitude");
-            writer.write("Longitude");
-            writer.write("RPM");
-            writer.write("Throttle %");
-            writer.write("Fuel Level %");
-            writer.write("Distance Travelled (km)");
-            writer.write("Fuel Economy (L/100km)");
-            writer.newLine();
+		File file = currentFile;  
+        
+       	FileWriter fw = new FileWriter(file, true);
+       	BufferedWriter writer = new BufferedWriter( fw );
 
-            writer.write(this.time);							// RowData[0]
-            writer.write(Integer.toString(this.speed));			// RowData[1]
-            writer.write(Double.toString(this.lat));			// RowData[2]
-            writer.write(Double.toString(this.lng));			// RowData[3]
-            writer.write(Double.toString(this.rpm));			// RowData[4]
-            writer.write(Double.toString(this.throttle));		// RowData[5]
-            writer.write(Double.toString(this.fuel_level));		// RowData[6]
-            writer.write(Double.toString(this.dist));			// RowData[7]
-            writer.write(Double.toString(this.fuel_econ));		// RowData[8]
-            writer.newLine();
+       	writer.write(this.time);
+       	writer.write(Integer.toString(this.speed));
+       	writer.write(Double.toString(this.lat));
+       	writer.write(Double.toString(this.lng));
+       	writer.write(Double.toString(this.rpm));
+       	writer.write(Double.toString(this.throttle));
+       	writer.write(Double.toString(this.fuel_level));
+       	writer.write(Double.toString(this.dist));
+       	writer.write(Double.toString(this.fuel_econ));
+       	writer.newLine();
         
-            writer.flush();
-            writer.close();
-            fw.close();
-        	
-        } else {
-        
-        	FileWriter fw = new FileWriter(file, true);
-        	BufferedWriter writer = new BufferedWriter( fw );
-
-        	writer.append(this.time);
-        	writer.append(Integer.toString(this.speed));
-        	writer.append(Double.toString(this.lat));
-        	writer.append(Double.toString(this.lng));
-        	writer.append(Double.toString(this.rpm));
-        	writer.append(Double.toString(this.throttle));
-        	writer.append(Double.toString(this.fuel_level));
-        	writer.append(Double.toString(this.dist));
-        	writer.append(Double.toString(this.fuel_econ));
-        	writer.newLine();
-        
-        	writer.flush();
-        	writer.close();
-        	fw.close();
-        
-        }
+       	writer.flush();
+       	writer.close();
+       	fw.close();
         
 	}
 
